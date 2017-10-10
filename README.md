@@ -9,7 +9,6 @@ The script was intended for use with MUGEN 1.0, however, other versions (MUGEN 1
 You need Python 3 installed on your computer.  Python 2 won't work with this; you need Python 3.  Sorry to all Python 2 users.
 
 ##### What still needs to be implemented?
- - ZIP file support
  - Stage installation support
  - Dropbox/MEGA/Google Drive/Microsoft OneDrive/MediaFire Support (to simplify the process even further)
  
