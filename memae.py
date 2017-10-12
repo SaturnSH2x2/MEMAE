@@ -34,6 +34,12 @@ def main():
         print("\"{}\" was missing from your confg.json. Please double-check, then try running the program again.")
         sys.exit()
         
+    if not os.path.exists(os.path.join(installPath, "chars")) or \
+            not os.path.exists(os.path.join(installPath, "sound")) or \
+            not os.path.exists(os.path.join(installPath, "mugen.exe")):
+        print("Your MUGEN install doesn't seem to be configured properly. Make sure all files are in place, then try running the program again.")
+        sys.exit()
+        
     selectDef = []
     try:
         print(os.path.join(installPath, "data", "select.def"))
@@ -54,6 +60,9 @@ def main():
     
     installedChars = 0
     failedChars = 0
+    
+    installedStages = 0
+    failedStages = 0
         
     try:
         charList = os.listdir(os.path.join(".", "install", "chars"))
@@ -129,7 +138,47 @@ def main():
         
         sys.stdout.write("Done.\n")
         installedChars += 1
-    0
+    
+    # first get location of stage list in file
+    exStageIndex = 0
+    foundExStage = False
+    for line in selectDef:
+        if line == "[ExtraStages]\n":
+            foundExStage = True
+            break
+        exStageIndex += 1
+        
+    if not foundExStage:
+        print("Could not locate stage location in \"select.def\". Double check the file, then try running again.")
+        sys.exit()
+        
+    stageList = os.listdir(os.path.join("install", "stages"))
+        
+    # unzip all zip files
+    for stage in stageList:
+        if stage.endswith(".zip"):
+            z = zipfile.ZipFile(os.path.join("install", "stages", stage))
+            z.extractall()
+            z.close()
+    
+    stageList = os.listdir(os.path.join("install", "stages"))
+        
+    # now we finally install the stages
+    for stage in stageList:
+        if stage.endswith(".def") or stage.endswith(".sff"):
+            os.rename(os.path.join("install", "stages", stage), os.path.join(installPath, "stages", os.path.basename(stage)))
+            
+            if stage.endswith(".def"):
+                selectDef.insert(exStageIndex + 1, "stages/{}\n".format(os.path.basename(stage)))
+                installedStages += 1
+            
+        elif stage.endswith(".mp3"):
+            os.rename(os.path.join("install", "stages", stage), os.path.join(installPath, "sound", os.path.basename(stage)))
+            
+        elif os.path.isdir(os.path.join("install", "stages", stage)):
+            for subdirStage in os.listdir(os.path.join("install", "stages", stage)):
+                stageList.append(os.path.join(stage, subdirStage))
+    
     sys.stdout.write("Writing to \"select.def\"...   ")
     
     lnIndex = 0
@@ -144,6 +193,8 @@ def main():
     print("--------------------------------")
     print("{} characters installed successfully.".format(installedChars))
     print("{} failed character installations.".format(failedChars))
+    print("{} stages installed successfully.".format(installedStages))
+    print("{} failed stage installations.".format(failedStages))
     print("Now running MUGEN...")
     
     # thanks:  https://stackoverflow.com/questions/21406887/subprocess-changing-directory
