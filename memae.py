@@ -198,7 +198,7 @@ def main():
     print("Now running MUGEN...")
     
     # thanks:  https://stackoverflow.com/questions/21406887/subprocess-changing-directory
-    #subprocess.Popen("cd {} && .\\mugen.exe".format(installPath), shell = True)
+    subprocess.Popen("cd {} && .\\mugen.exe".format(installPath), shell = True)
     sys.exit()
     
 if __name__ == "__main__":
